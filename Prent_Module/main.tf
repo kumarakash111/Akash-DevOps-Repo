@@ -1,5 +1,12 @@
 module "rg" {
   source      = "../child_module/azurerm_resource_group"
+  rg_name     = "nannu-rg"
+  rg_location = "west-us"
+}
+
+
+module "rg" {
+  source      = "../child_module/azurerm_resource_group"
   for_each = var.resource_group_name
   rg_name     = each.value.name
   rg_location = each.value.location
