@@ -5,6 +5,13 @@ terraform {
       version = "4.35.0"
     }
   }
+
+  backend "azurerm" {
+    resource_group_name  = "rg_pipeline1"
+    storage_account_name = "storagergpipeline1"
+    container_name       = "containergpipeline1"
+    key                  = "yamlpipeline.terraform.tfstate"
+  }
 }
 
 provider "azurerm" {
