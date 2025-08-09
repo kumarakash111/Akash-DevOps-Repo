@@ -4,6 +4,12 @@ module "resource_group" {
   resource_group_location = "West us"
 }
 
+module "resource_group" {
+  source                  = "../Child_modules/azurerm_resource_group"
+  resource_group_name     = "rajtestrg"
+  resource_group_location = "West us"
+}
+
 module "virtual_network" {
   depends_on              = [module.resource_group]
   source                  = "../child_modules/azurerm_virtual_network"
