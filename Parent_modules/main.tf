@@ -4,7 +4,7 @@ module "resource_group" {
   resource_group_location = "West us"
 }
 
-module "resource_group" {
+module "resource_group1" {
   source                  = "../Child_modules/azurerm_resource_group"
   resource_group_name     = "rajtestrg"
   resource_group_location = "West us"
