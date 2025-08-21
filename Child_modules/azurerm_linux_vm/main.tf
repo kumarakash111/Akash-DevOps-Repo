@@ -10,8 +10,8 @@ data "azurerm_public_ip" "datapublicip" {
 }
 
 data "azurerm_key_vault" "keyvault" {
-  name                = "b17-g13-keyVault"
-  resource_group_name = "KeyVaultRg"
+  name                = "kryvaultpipeline77"
+  resource_group_name = "rg_pipeline77"
 }
 
 data "azurerm_key_vault_secret" "todo-vm-username" {
