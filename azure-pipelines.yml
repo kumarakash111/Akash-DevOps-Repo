@@ -1,0 +1,101 @@
+trigger: none
+pool: Azure Pipelines
+
+parameters:
+- name: ScanningRequired
+  displayName: Scanning Required?
+  type: string
+  values: 
+  - true
+  - false
+
+jobs:
+- job: build
+  displayName: terraform init validate and plan
+  steps:
+  - task: TerraformInstaller@1
+    displayName: installing terraform
+    inputs:
+      terraformVersion: 'latest'
+
+  - task: TerraformTaskV4@4
+    displayName: exectuting terrform initializing 
+    inputs:
+      provider: 'azurerm'
+      command: 'init'
+      workingDirectory: '$(System.DefaultWorkingDirectory)\parent_modules'
+      backendServiceArm: 'Service-Connection-Rajnesh-Account'
+      backendAzureRmResourceGroupName: 'rg_pipeline77'
+      backendAzureRmStorageAccountName: 'storagergpipeline77'
+      backendAzureRmContainerName: 'containergpipeline77'
+      backendAzureRmKey: 'yamlpipeline77.terraform.tfstate'
+
+  - task: TerraformTaskV4@4
+    displayName: validating terraform code
+    inputs:
+      provider: 'azurerm'
+      command: 'validate'
+      workingDirectory: '$(System.DefaultWorkingDirectory)\parent_modules'
+
+  - task: TerraformTask@5
+    displayName: planning to create resources
+    inputs:
+      provider: 'azurerm'
+      command: 'plan'
+      workingDirectory: '$(System.DefaultWorkingDirectory)\parent_modules'
+      environmentServiceNameAzureRM: 'Service-Connection-Rajnesh-Account'
+
+- job: securityscan
+  condition: eq('${{ parameters.ScanningRequired }}', 'true')
+  displayName: tfsec secirutyscanning
+  pool: Azure Pipelines
+  dependsOn: build
+  steps:
+  - task: tfsec@1
+    inputs:
+      version: 'v1.26.0'
+      dir: '$(Build.SourcesDirectory)\parent_modules'
+
+
+- job: tflint
+  condition: eq('${{ parameters.ScanningRequired }}', 'true')
+  displayName: tflint secirutyscanning
+  pool: Azure Pipelines
+  dependsOn: build
+  steps:
+  - task: CmdLine@2
+    inputs:
+      script: 'echo Hello world'
+
+- job: manualvalidation
+  displayName: manualvalidation brfore apply
+  dependsOn: build
+  pool: server
+  steps:
+  - task: ManualValidation@1
+    inputs:
+      notifyUsers: 'Akash@manosijmajumdergmail.onmicrosoft.com'
+
+- job: apply
+  displayName: terraform apply
+  dependsOn: manualvalidation
+  steps:
+  - task: TerraformTaskV4@4
+    displayName: terrform initializing for apply 
+    inputs:
+      provider: 'azurerm'
+      command: 'init'
+      workingDirectory: '$(System.DefaultWorkingDirectory)\parent_modules'
+      backendServiceArm: 'Service-Connection-Rajnesh-Account'
+      backendAzureRmResourceGroupName: 'rg_pipeline77'
+      backendAzureRmStorageAccountName: 'storagergpipeline77'
+      backendAzureRmContainerName: 'containergpipeline77'
+      backendAzureRmKey: 'yamlpipeline77.terraform.tfstate'
+  - task: TerraformTask@5
+    inputs:
+      provider: 'azurerm'
+      command: 'apply'
+      workingDirectory: '$(System.DefaultWorkingDirectory)\parent_modules'
+      environmentServiceNameAzureRM: 'Service-Connection-Rajnesh-Account' 
+
+
